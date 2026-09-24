@@ -290,6 +290,8 @@ footer a{color:var(--ink-soft);}
 .comp-inline-link{margin:.65rem 0 0;font-size:.82rem;font-weight:700;}
 .comp-res{margin:.55rem 0 0;font-size:.82rem;color:var(--ink-soft);border-top:1px dotted var(--line);padding-top:.5rem;}
 .comp-res a{font-weight:700;white-space:nowrap;}
+.gyo-link{display:inline-block;margin-top:.45rem;font-size:.75rem;font-weight:800;white-space:nowrap;text-decoration:none;background:var(--accent-soft);color:var(--accent-deep);padding:.14rem .5rem;border-radius:999px;}
+.gyo-link:hover{background:var(--accent);color:#fff;}
 
 @media print{
   .topbar,.filters,.quiz-actions,.hero-cta{display:none;}
@@ -1571,11 +1573,24 @@ function compRender(){
   more.textContent=`さらに${Math.min(20,list.length-view.length)}社見る`;
 }
 function compReset(){compShown=20;compRender();}
-function compApplyCat(cat){
-  compCat=COMP_CATS.includes(cat)?cat:"all";compSize="all";compQ="";
-  document.getElementById("compQ").value="";
+function compApplyFilter(cat,q){
+  compCat=COMP_CATS.includes(cat)?cat:"all";compSize="all";compQ=q||"";
+  document.getElementById("compQ").value=compQ;
   drawCat();drawSz();compReset();
   document.getElementById("kigyo").scrollIntoView({behavior:"smooth",block:"start"});
+}
+/* 12業界早見表の各行から企業一覧へ飛ぶリンクを付ける */
+const COMP_GYOMAP={"メーカー（製造業）": ["製造業", ""], "商社・卸売": ["卸売業", ""], "IT・情報通信": ["情報通信業", ""], "建設・不動産": ["建設業・不動産業", ""], "医療機関（病院・クリニック）": ["公務・医療・教育・団体（参考／業種分類外）", "病院"], "学校法人（大学・専門・小中高）": ["公務・医療・教育・団体（参考／業種分類外）", "学校"], "金融（銀行・保険・証券）": ["金融業・保険業", ""], "人材サービス・アウトソーシング": ["サービス", "人材"], "小売・流通": ["小売業", ""], "物流・運輸": ["運輸業・郵便業", ""], "官公庁・自治体（行政事務）": ["公務・医療・教育・団体（参考／業種分類外）", "行政"]};
+function compAttachGyokai(){
+  document.querySelectorAll("#gyoBody td.gyoname").forEach(td=>{
+    const name=(td.childNodes[0]&&td.childNodes[0].textContent||"").trim();
+    const m=COMP_GYOMAP[name];if(!m)return;
+    const [cat,q]=m;
+    const n=COMP_LIST.filter(c=>(cat==="all"||c[0]===cat)&&(!q||(c[1]+c[2]+c[3]).includes(q))).length;
+    if(!n)return;
+    td.insertAdjacentHTML("beforeend",
+      `<br><a class="gyo-link" href="#kigyo" data-compcat="${compEsc(cat)}" data-compq="${compEsc(q)}">この業界の企業 ${n}社 →</a>`);
+  });
 }
 
 /* 職種に紐づく企業を選ぶ。業種で絞り、キーワードで寄せ、規模がばらけるように交互に取る */
@@ -1620,7 +1635,7 @@ document.addEventListener("click",e=>{
   const a=e.target.closest("[data-compcat]");
   if(!a)return;
   e.preventDefault();
-  compApplyCat(a.getAttribute("data-compcat"));
+  compApplyFilter(a.getAttribute("data-compcat"),a.getAttribute("data-compq")||"");
 });
 document.getElementById("compQ").addEventListener("input",e=>{compQ=e.target.value;compReset();});
 document.getElementById("compMore").addEventListener("click",()=>{compShown+=20;compRender();});
@@ -1637,7 +1652,7 @@ document.getElementById("calcBtn").addEventListener("click",()=>{
       `<p class="comp-res">${cats.length?"この業界の企業例":"例えばこんな企業"}：${picks.map(c=>compEsc(c[1])).join("、")}　<a href="#kigyo" data-compcat="${compEsc(one)}">企業を見る →</a></p>`);
   });
 });
-drawCat();drawSz();compRender();compAttachJobs();
+drawCat();drawSz();compRender();compAttachJobs();compAttachGyokai();
 </script>
 </body>
 </html>
