@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="googlebot" content="noindex, nofollow">
 <meta name="description" content="学生のための事務職理解ガイド。事務職は業界・会社の規模・雇用形態によって中身がまったく違います。9つの事務職を動画と1日の流れで比較できます。">
 <title>事務職まるわかりナビ｜業界と会社規模でこんなに違う「事務」の中身</title>
 <style>
@@ -1601,7 +1603,7 @@ function compPick(spec,n){
     : COMP_CATS.flatMap(cat=>{const g=COMP_LIST.filter(c=>c[0]===cat);return g.length?[g[0],g[g.length-1]]:[];});
   if(kw.length){
     const hit=pool.filter(c=>kw.some(k=>(c[1]+c[2]).includes(k)));
-    if(hit.length>=3)pool=hit;
+    if(hit.length>=1)pool=hit;
   }
   const groups=["大手","中堅","地域","－"].map(sz=>pool.filter(c=>c[5]===sz));
   const out=[];let i=0;
